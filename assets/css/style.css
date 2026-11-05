@@ -857,6 +857,9 @@ a.role:hover p { color: var(--muted); }
 }
 
 .contact-send:active { transform: translateY(0); }
+.contact-send:disabled { cursor: wait; }
+.contact-privacy { color: var(--muted); font-size: .78rem; line-height: 1.6; }
+.contact-privacy a { text-decoration: underline; }
 
 .send-octo {
   color: var(--bg);

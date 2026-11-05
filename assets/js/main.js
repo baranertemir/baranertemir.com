@@ -102,7 +102,7 @@ if (pathEl) pathEl.textContent = location.pathname;
   items.forEach((el) => io.observe(el));
 })();
 
-// contact form — prepare a draft for the clipboard
+// contact form — submit to the configured Formspree endpoint
 (function () {
   const form = document.getElementById("contact-form");
   if (!form) return;
@@ -248,8 +248,10 @@ if (pathEl) pathEl.textContent = location.pathname;
 
   startPlaceholderCycle();
 
-  form.addEventListener("submit", (e) => {
+  let submitting = false;
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (submitting) return;
     const email = (document.getElementById("contact-email")?.value || "").trim();
     const purpose = (hidden?.value || "").trim();
     const purposeLabel = valueEl?.dataset.placeholder === "true"
@@ -271,32 +273,48 @@ if (pathEl) pathEl.textContent = location.pathname;
       return;
     }
 
+    submitting = true;
+    const label = sendBtn?.querySelector(".send-label");
+    const controls = [sendBtn, trigger, document.getElementById("contact-email"), document.getElementById("contact-message")].filter(Boolean);
+    controls.forEach((control) => { control.disabled = true; });
+    closeMenu();
+    form.setAttribute("aria-busy", "true");
     sendBtn?.classList.remove("is-sent");
     sendBtn?.classList.add("is-sending");
-
-    const draft = `Purpose: ${purposeLabel}\nFrom: ${email}\n\n${message}`;
-    const finish = (statusMsg) => {
-      sendBtn?.classList.remove("is-sending");
-      sendBtn?.classList.add("is-sent");
-      setStatus(statusMsg, "ok");
-      setTimeout(() => sendBtn?.classList.remove("is-sent"), 900);
-    };
-
-    const copyDraft = () => {
-      if (navigator.clipboard?.writeText) {
-        return navigator.clipboard.writeText(draft);
+    if (label) label.textContent = "Sending…";
+    setStatus("Sending your message…", "");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ email, purpose: purposeLabel || purpose, message }),
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        setStatus(response.status === 429
+          ? "Too many requests. Please try again later or contact me through LinkedIn or X."
+          : "Your message could not be sent. Please try again later or contact me through LinkedIn or X.", "error");
+        return;
       }
-      return Promise.reject();
-    };
-
-      copyDraft()
-        .then(() => {
-          finish("Message copied. Paste it via LinkedIn, X, or another link below.");
-        })
-        .catch(() => {
-          sendBtn?.classList.remove("is-sending");
-          setStatus("Could not copy the message. Copy your text manually and use LinkedIn or X below.", "error");
-        });
+      form.reset();
+      if (hidden) hidden.value = "";
+      options.forEach((option) => option.setAttribute("aria-selected", "false"));
+      if (valueEl) valueEl.dataset.placeholder = "true";
+      startPlaceholderCycle();
+      sendBtn?.classList.add("is-sent");
+      setStatus("Thank you! Your message has been submitted successfully.", "ok");
+    } catch {
+      setStatus("Delivery could not be confirmed. Your text is still here; please try again later or contact me through LinkedIn or X.", "error");
+    } finally {
+      clearTimeout(timeout);
+      submitting = false;
+      controls.forEach((control) => { control.disabled = false; });
+      form.setAttribute("aria-busy", "false");
+      sendBtn?.classList.remove("is-sending");
+      if (label) label.textContent = "Send message";
+    }
   });
 })();
 

@@ -30,6 +30,8 @@ jobs:
       - name: Validate SEO and publication rules
         shell: pwsh
         run: ./scripts/check-site.ps1
+      - name: Validate contact form behavior
+        run: node scripts/check-contact.cjs
       - name: Build production
         run: hugo --environment production --minify --buildDrafts=false --buildFuture=false --destination public
       - name: Reject development output

@@ -32,6 +32,9 @@ Hosting GitHub Pages olarak belirlendi. Repository bağlantısı/yayın erişimi
 
 ### Canlı denetim ve Search Console
 
+- İletişim formu verilen Formspree endpoint'ine bağlandı. POST gönderimi, yüklenme kilidi, 20 saniyelik timeout, hata durumunda metni koruma ve kabul sonrası sıfırlama eklendi. Panoya kopyalama kaldırıldı. Formspree veri işleme açıklaması eklendi.
+- `node scripts/check-contact.cjs` ile payload, başarılı yanıt, eşzamanlı gönderim engeli, 422/429/500 ve ağ hataları gerçek mesaj göndermeden test edildi. Inbox teslimatı için kullanıcıdan gerçek gönderim doğrulaması bekleniyor.
+
 - Kullanıcının bildirimiyle sitemap gönderimi, canlı ana sayfa URL denetimi ve dizine ekleme isteği başarıyla tamamlandı. Bu, Google'ın sayfayı kesin olarak indekslediği anlamına gelmez.
 - Kontrast düzeltmesi testleri tekrar geçti; yayın için hazırlandı. HTTP → HTTPS zorlaması açık olmasına rağmen bu ortamdan alınan son HTTP yanıtı hâlâ 200: yönlendirme doğrulaması henüz tamamlanmadı.
 
