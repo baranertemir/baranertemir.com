@@ -6,7 +6,7 @@
   --border: #32363d;
   --fg: #e8eaed;
   --muted: #9aa0a8;
-  --accent: #d9554e;
+  --accent: #ed827a;
   --accent-soft: rgba(217, 85, 78, .14);
   --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
   --sans: "Space Grotesk", system-ui, sans-serif;
@@ -36,7 +36,7 @@ body {
   padding-inline: clamp(1.1rem, 5vw, 2.2rem);
 }
 
-::selection { background: var(--accent); color: #fff; }
+::selection { background: var(--accent); color: var(--bg); }
 a { color: inherit; text-decoration: none; }
 
 /* ---- header ---- */
@@ -101,7 +101,7 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--mono);
   font-size: .78rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--bg);
   background: var(--accent);
   border-radius: 7px;
   padding: .35rem .7rem;
@@ -734,7 +734,7 @@ a.role:hover p { color: var(--muted); }
 
 .contact-form input::placeholder,
 .contact-form textarea::placeholder {
-  color: color-mix(in srgb, var(--muted) 75%, transparent);
+  color: var(--muted);
 }
 
 .contact-form input:focus,
@@ -766,7 +766,7 @@ a.role:hover p { color: var(--muted); }
 }
 
 .purpose-value[data-placeholder="true"] {
-  color: color-mix(in srgb, var(--muted) 75%, transparent);
+  color: var(--muted);
 }
 
 .purpose-value.is-cycling {
@@ -842,7 +842,7 @@ a.role:hover p { color: var(--muted); }
   font-family: var(--mono);
   font-size: .88rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--bg);
   background: var(--accent);
   border: none;
   border-radius: 9px;
@@ -859,7 +859,7 @@ a.role:hover p { color: var(--muted); }
 .contact-send:active { transform: translateY(0); }
 
 .send-octo {
-  color: #fff;
+  color: var(--bg);
   transition: transform .2s ease;
 }
 
@@ -1018,7 +1018,7 @@ a.role:hover p { color: var(--muted); }
 
 .theme-credit {
   font-size: .68rem;
-  opacity: .75;
+  opacity: 1;
 }
 
 .theme-credit a {

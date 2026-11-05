@@ -30,6 +30,24 @@ Hosting GitHub Pages olarak belirlendi. Repository bağlantısı/yayın erişimi
 
 ## Ek ilerleme
 
+### Canlı denetim ve Search Console
+
+- Kullanıcının bildirimiyle sitemap gönderimi, canlı ana sayfa URL denetimi ve dizine ekleme isteği başarıyla tamamlandı. Bu, Google'ın sayfayı kesin olarak indekslediği anlamına gelmez.
+- Kontrast düzeltmesi testleri tekrar geçti; yayın için hazırlandı. HTTP → HTTPS zorlaması açık olmasına rağmen bu ortamdan alınan son HTTP yanıtı hâlâ 200: yönlendirme doğrulaması henüz tamamlanmadı.
+
+- HTTPS güncellemesi: Kullanıcının açık onayıyla özel alan adı kaldırılıp yeniden eklendi. Sertifika approved durumuna geçti; hem ana alan adını hem www adresini kapsıyor (son geçerlilik: 2027-02-03). TLS doğrulaması başarılı, HTTPS ana sayfa ve sitemap 200, olmayan URL 404, HTTPS www → ana alan adı 301. Enforce HTTPS etkinleştirildi; HTTP uç önbellek yayılımı ayrıca kontrol ediliyor.
+
+- Kaynaklar GitHub main dalına gönderildi; 42057256376 numaralı Actions çalışmasının ikinci denemesinde build ve deployment başarılı.
+- DNS A kayıtları GitHub Pages IP'lerini, www CNAME kaydı baranertemir.github.io adresini gösteriyor.
+- HTTP üzerinden ana sayfa, sitemap, robots ve paylaşım görseli 200; olmayan URL 404; www ana alan adına 301 dönüyor.
+- Son doğrudan kontrolde HTTPS sertifikası null ve TLS alan adı eşleşmesi başarısızdı. HTTPS zorlaması açılmadı. Daha sonraki web aracı da HTTPS adresine erişemedi; bu son araç sonucu tek başına sertifika teşhisi değildir.
+- Google Rich Results Test: ana sayfada 1 geçerli ProfilePage. Sonuç: https://search.google.com/test/rich-results/result?id=HWEy_YWuRYJS2wQxij6A3w
+- Mobil PageSpeed ilk ölçüm (HTTP): Performans 95, Erişilebilirlik 96, En İyi Uygulamalar 78, SEO 100; FCP 1,4 sn, LCP 2,4 sn, TBT 0 ms, CLS 0.003. Bunlar laboratuvar ölçümleridir. Sonuç: https://pagespeed.web.dev/analysis/http-baranertemir-com/x2v13e4x9s?form_factor=mobile
+- Kontrast düzeltmesi yerelde hazır: vurgu/yüzey 5.84:1, düğme metni/vurgu 6.56:1. Placeholder şeffaflığı ve footer metin saydamlığı kaldırıldı. Testler geçti; bu değişiklik henüz commit/push edilmedi.
+- Kullanıcının paylaştığı Search Console ekranı ve TXT doğrulaması açıklamasıyla alan adı mülkiyeti doğrulandı. Sitemap gönderimi ve URL denetimi henüz yapılmadı.
+- Kullanıcı içerikleri kendisi sağlayacak; yazılar taslak kalacak. Gerçek iletişim adresi/CV bilgisi henüz verilmedi.
+- Yerel font indirme komutu, otomatik onay incelemesi kullanım sınırına takıldığı için çalışmadı. Bu güvenlik reddi değil, onay hizmeti hatasıdır. Harici font kullanımı korunuyor.
+
 - Yerel sunucu `-D` ile aynı 62032 portunda yeniden başlatıldı; Articles ve Blogs tarayıcıda doğrulandı.
 - İkinci ve sonraki arşiv sayfaları kendi canonical adresini ve numaralı başlığını alıyor. Çok yazılı test eklendi ve geçti.
 - 390px genişlikte ana sayfa ve mevcut makalede yatay sayfa taşması görülmedi. Uzun kod/tablo içeren içeriklerin kapsamlı testi bekliyor.
