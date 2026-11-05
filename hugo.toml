@@ -8,6 +8,8 @@ buildFuture = false
 
 [params]
 contact_endpoint = "https://formspree.io/f/mrppdynn"
+# Enable only after the matching secret is configured in Formspree.
+turnstile_site_key = "0x4AAAAAAF1UENvNUjiipzqs"
 seo_title = "Aydın Baran Ertemir | Security Research"
 description = "Security research and technical notes by Aydın Baran Ertemir on web application security, threat intelligence, reverse engineering and Linux."
 social_image = "images/social-card.png"

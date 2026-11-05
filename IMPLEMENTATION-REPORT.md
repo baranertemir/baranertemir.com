@@ -32,6 +32,8 @@ Hosting GitHub Pages olarak belirlendi. Repository bağlantısı/yayın erişimi
 
 ### Canlı denetim ve Search Console
 
+- Cloudflare Turnstile: Kullanıcının verdiği public Site Key eklendi; kullanıcı Formspree'de Secret Key ve CAPTCHA korumasını etkinleştirdiğini doğruladı. Anahtar gizli değildir; Secret Key depoya alınmadı. Eksik/expired token engeli, payload alanı ve istek sonrası reset yerel testleri geçti. Gerçek CAPTCHA ve e-posta teslimatı için son kullanıcı denemesi gereklidir.
+
 - İletişim formu verilen Formspree endpoint'ine bağlandı. POST gönderimi, yüklenme kilidi, 20 saniyelik timeout, hata durumunda metni koruma ve kabul sonrası sıfırlama eklendi. Panoya kopyalama kaldırıldı. Formspree veri işleme açıklaması eklendi.
 - `node scripts/check-contact.cjs` ile payload, başarılı yanıt, eşzamanlı gönderim engeli, 422/429/500 ve ağ hataları gerçek mesaj göndermeden test edildi. Inbox teslimatı için kullanıcıdan gerçek gönderim doğrulaması bekleniyor.
 

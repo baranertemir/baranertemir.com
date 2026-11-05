@@ -231,12 +231,16 @@
         ></textarea>
       </label>
 
+      {{ with .Site.Params.turnstile_site_key }}
+      <div id="contact-captcha" data-sitekey="{{ . }}" aria-label="Anti-spam verification"></div>
+      {{ end }}
       <button type="submit" class="contact-send" id="contact-send">
         <span class="send-label">Send message</span>
         {{ partial "octopus.html" (dict "class" "send-octo" "width" 18 "height" 18) }}
       </button>
       <p class="contact-status" id="contact-status" role="status" aria-live="polite"></p>
       <p class="contact-privacy">Your email and message are processed by <a href="https://formspree.io/legal/privacy-policy/" target="_blank" rel="noopener">Formspree</a> to deliver your enquiry.</p>
+      {{ with .Site.Params.turnstile_site_key }}<p class="contact-privacy">Protected by Cloudflare Turnstile. <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Privacy</a> · <a href="https://www.cloudflare.com/website-terms/" target="_blank" rel="noopener">Terms</a></p>{{ end }}
     </form>
 
     <div class="contact-alt">

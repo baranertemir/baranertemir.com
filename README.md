@@ -45,6 +45,12 @@ Site-level templates override the theme so SEO changes survive theme updates. Ex
 
 ## Validation and maintenance
 
+### Turnstile activation
+
+Create a Managed Cloudflare Turnstile widget for `baranertemir.com` and `www.baranertemir.com`. Store its secret ONLY in Formspree Settings > CAPTCHA > Cloudflare Turnstile and enable CAPTCHA protection. Put the public site key in `params.turnstile_site_key`. Until both steps are complete, the integration is not active. Never put the secret in Hugo configuration or Git. Use a separate test widget/key for local testing.
+
+The browser sends `cf-turnstile-response` with the AJAX payload and refreshes the challenge after every attempted request. Missing/expired tokens prevent client submissions, while Formspree must enforce validation server-side. Verify both a valid submission and rejection without a token before calling the protection complete.
+
 Run `powershell -File scripts/check-site.ps1` for isolated draft/future/noindex/metadata checks. Test fixtures and output live in a new temporary directory, leaving site content unchanged.
 
 Site CSS and JavaScript now live in `assets/css/style.css` and `assets/js/main.js`. Hugo minifies and fingerprints these resources. The site index and base templates override the theme to load them. Edit those copies for future changes. The source avatar is in `assets/images/` and Hugo generates 168/336px WebP variants. The original static avatar remains available for existing URLs and schema.

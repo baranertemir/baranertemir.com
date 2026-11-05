@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync('assets/js/main.js', 'utf8');
 const contact = source.slice(source.indexOf('// contact form'), source.indexOf('// site views counter'));
-function setup(fetch) {
+function setup(fetch, captchaOptions = null) {
   const nodes = {};
   for (const id of ['contact-form', 'purpose-select', 'purpose-trigger', 'purpose-menu', 'purpose-placeholder', 'contact-purpose', 'contact-status', 'contact-send', 'contact-email', 'contact-message']) {
     nodes[id] = { value: '', textContent: '', dataset: {}, disabled: false, handlers: {},
@@ -19,7 +19,15 @@ function setup(fetch) {
   nodes['contact-purpose'].value = 'research';
   nodes['purpose-placeholder'].textContent = 'Security research';
   nodes['purpose-placeholder'].dataset.placeholder = 'false';
-  vm.runInNewContext(contact, { document: {getElementById: id => nodes[id], addEventListener() {}}, window: {matchMedia: () => ({matches:true})}, fetch, AbortController, setTimeout, clearTimeout, setInterval, clearInterval });
+  const browser = {matchMedia: () => ({matches:true})};
+  if (captchaOptions) {
+    nodes['contact-captcha'] = {dataset: {sitekey: 'test-key'}};
+    if (!captchaOptions.unavailable) browser.turnstile = {
+      render(selector, callbacks) { captchaOptions.callbacks = callbacks; if (captchaOptions.token) callbacks.callback(captchaOptions.token); return 'widget-1'; },
+      reset(id) { assert.equal(id, 'widget-1'); captchaOptions.resets = (captchaOptions.resets || 0) + 1; },
+    };
+  }
+  vm.runInNewContext(contact, { document: {getElementById: id => nodes[id], addEventListener() {}}, window: browser, fetch, AbortController, setTimeout, clearTimeout, setInterval, clearInterval });
   return { nodes, submit: () => nodes['contact-form'].handlers.submit({preventDefault(){}}) };
 }
 (async () => {
@@ -55,5 +63,23 @@ function setup(fetch) {
   invalid.nodes['contact-email'].value = '';
   await invalid.submit();
   assert.match(invalid.nodes['contact-status'].textContent, /valid email/);
+  for (const settings of [{}, {unavailable:true}, {token:'expired'}]) {
+    let requests = 0;
+    const test = setup(async () => { requests++; return {ok:true}; }, settings);
+    if (settings.token) settings.callbacks['expired-callback']();
+    await test.submit();
+    assert.equal(requests, 0, 'Missing, unavailable or expired CAPTCHA must block fetch');
+    assert.match(test.nodes['contact-status'].textContent, /anti-spam/);
+  }
+  for (const ok of [true, false]) {
+    const settings = {token:'test-token'};
+    const test = setup(async (url, options) => {
+      assert.equal(JSON.parse(options.body)['cf-turnstile-response'], 'test-token');
+      return {ok,status:422};
+    }, settings);
+    await test.submit();
+    assert.equal(settings.resets, 1, 'Token must be reset after success or rejection');
+    assert.equal(test.nodes['contact-send'].disabled, false);
+  }
   console.log('PASS: payload, success/reset, concurrent submit, HTTP errors, network failure and validation. No real messages sent.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

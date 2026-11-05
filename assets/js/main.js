@@ -249,6 +249,22 @@ if (pathEl) pathEl.textContent = location.pathname;
   startPlaceholderCycle();
 
   let submitting = false;
+  const captcha = document.getElementById("contact-captcha");
+  let captchaToken = "";
+  let captchaId = null;
+  if (captcha && window.turnstile) {
+    captchaId = window.turnstile.render("#contact-captcha", {
+      sitekey: captcha.dataset.sitekey,
+      theme: "dark",
+      size: "compact",
+      callback: (token) => { captchaToken = token; },
+      "expired-callback": () => { captchaToken = ""; },
+      "error-callback": () => {
+        captchaToken = "";
+        setStatus("Verification could not load. Please reload the page or contact me through LinkedIn or X.", "error");
+      },
+    });
+  }
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (submitting) return;
@@ -273,6 +289,12 @@ if (pathEl) pathEl.textContent = location.pathname;
       return;
     }
 
+    if (captcha && !captchaToken) {
+      setStatus("Please complete the anti-spam verification. If it does not appear, reload the page or use the social links below.", "error");
+      return;
+    }
+    const payload = { email, purpose: purposeLabel || purpose, message };
+    if (captcha) payload["cf-turnstile-response"] = captchaToken;
     submitting = true;
     const label = sendBtn?.querySelector(".send-label");
     const controls = [sendBtn, trigger, document.getElementById("contact-email"), document.getElementById("contact-message")].filter(Boolean);
@@ -289,7 +311,7 @@ if (pathEl) pathEl.textContent = location.pathname;
       const response = await fetch(form.action, {
         method: "POST",
         headers: { "Accept": "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ email, purpose: purposeLabel || purpose, message }),
+        body: JSON.stringify(payload),
         signal: controller.signal,
       });
       if (!response.ok) {
@@ -309,6 +331,14 @@ if (pathEl) pathEl.textContent = location.pathname;
       setStatus("Delivery could not be confirmed. Your text is still here; please try again later or contact me through LinkedIn or X.", "error");
     } finally {
       clearTimeout(timeout);
+      if (captcha) {
+        captchaToken = "";
+        try {
+          if (captchaId !== null && window.turnstile) window.turnstile.reset(captchaId);
+        } catch {
+          // Keep the form usable for recovery; an empty token still blocks submission.
+        }
+      }
       submitting = false;
       controls.forEach((control) => { control.disabled = false; });
       form.setAttribute("aria-busy", "false");
