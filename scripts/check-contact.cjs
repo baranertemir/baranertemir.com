@@ -6,11 +6,11 @@ const source = fs.readFileSync('assets/js/main.js', 'utf8');
 const contact = source.slice(source.indexOf('// contact form'), source.indexOf('// site views counter'));
 function setup(fetch, captchaOptions = null) {
   const nodes = {};
-  for (const id of ['contact-form', 'purpose-select', 'purpose-trigger', 'purpose-menu', 'purpose-placeholder', 'contact-purpose', 'contact-status', 'contact-send', 'contact-email', 'contact-message']) {
-    nodes[id] = { value: '', textContent: '', dataset: {}, disabled: false, handlers: {},
+  for (const id of ['contact-form', 'purpose-select', 'purpose-trigger', 'purpose-menu', 'purpose-placeholder', 'contact-purpose', 'contact-status', 'captcha-status', 'contact-send', 'contact-email', 'contact-message']) {
+    nodes[id] = { value: '', textContent: '', dataset: {}, disabled: false, handlers: {}, attributes: {}, focused: false,
       classList: { add() {}, remove() {}, toggle() {} },
       addEventListener(name, handler) { this.handlers[name] = handler; },
-      setAttribute() {}, querySelectorAll() { return []; }, querySelector() { return null; }, contains() { return false; }, focus() {} };
+      setAttribute(name, value) { this.attributes[name] = value; }, removeAttribute(name) { delete this.attributes[name]; }, querySelectorAll() { return []; }, querySelector() { return null; }, contains() { return false; }, focus() { this.focused = true; } };
   }
   nodes['contact-form'].action = 'https://formspree.io/f/mrppdynn';
   nodes['contact-form'].reset = () => { nodes['contact-email'].value = ''; nodes['contact-message'].value = ''; };
@@ -63,13 +63,39 @@ function setup(fetch, captchaOptions = null) {
   invalid.nodes['contact-email'].value = '';
   await invalid.submit();
   assert.match(invalid.nodes['contact-status'].textContent, /valid email/);
+  assert.equal(invalid.nodes['contact-email'].attributes['aria-invalid'], 'true');
+  assert.equal(invalid.nodes['contact-email'].focused, true);
+  invalid.nodes['contact-email'].handlers.input();
+  assert.equal(invalid.nodes['contact-email'].attributes['aria-invalid'], undefined);
+  assert.equal(success.nodes['purpose-placeholder'].textContent, 'Select a purpose');
+  const recoverySettings = {};
+  const recovery = setup(async () => ({ok:false, status:500}), recoverySettings);
+  recoverySettings.callbacks['error-callback']();
+  assert.match(recovery.nodes['captcha-status'].textContent, /could not load/);
+  recoverySettings.callbacks.callback('recovered');
+  assert.equal(recovery.nodes['captcha-status'].textContent, '');
+  await recovery.submit();
+  const deliveryError = recovery.nodes['contact-status'].textContent;
+  recoverySettings.callbacks.callback('fresh');
+  assert.equal(recovery.nodes['contact-status'].textContent, deliveryError, 'CAPTCHA success must preserve delivery feedback');
+  recoverySettings.callbacks['timeout-callback']();
+  assert.match(recovery.nodes['captcha-status'].textContent, /timed out/);
+  recoverySettings.callbacks.callback('fresh');
+  assert.equal(recovery.nodes['captcha-status'].textContent, '');
+  for (const [field, expected] of [['contact-purpose', 'purpose-trigger'], ['contact-message', 'contact-message']]) {
+    const validation = setup(() => { throw new Error('Invalid input must not send'); });
+    validation.nodes[field].value = '';
+    await validation.submit();
+    assert.equal(validation.nodes[expected].attributes['aria-invalid'], 'true');
+    assert.equal(validation.nodes[expected].focused, true);
+  }
   for (const settings of [{}, {unavailable:true}, {token:'expired'}]) {
     let requests = 0;
     const test = setup(async () => { requests++; return {ok:true}; }, settings);
     if (settings.token) settings.callbacks['expired-callback']();
     await test.submit();
     assert.equal(requests, 0, 'Missing, unavailable or expired CAPTCHA must block fetch');
-    assert.match(test.nodes['contact-status'].textContent, /anti-spam/);
+    assert.match(test.nodes['captcha-status'].textContent, /anti-spam/);
   }
   for (const ok of [true, false]) {
     const settings = {token:'test-token'};

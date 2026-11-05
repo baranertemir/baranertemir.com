@@ -115,52 +115,33 @@ if (pathEl) pathEl.textContent = location.pathname;
   const status = document.getElementById("contact-status");
   const sendBtn = document.getElementById("contact-send");
   const options = menu ? [...menu.querySelectorAll('[role="option"]')] : [];
-  const purposeLabels = options.map((o) => o.textContent.trim()).filter(Boolean);
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let cycleTimer = null;
-  let cycleIndex = 0;
   let isOpen = false;
-
   const setStatus = (msg, kind) => {
     if (!status) return;
     status.textContent = msg;
     status.classList.toggle("is-error", kind === "error");
     status.classList.toggle("is-ok", kind === "ok");
   };
-
-  const stopPlaceholderCycle = () => {
-    if (cycleTimer) {
-      clearInterval(cycleTimer);
-      cycleTimer = null;
-    }
-    valueEl?.classList.remove("is-cycling");
-  };
-
-  const showPlaceholder = (text, animate) => {
+  const resetPlaceholder = () => {
     if (!valueEl) return;
-    if (animate && !reduced) {
-      valueEl.classList.remove("is-cycling");
-      void valueEl.offsetWidth;
-      valueEl.classList.add("is-cycling");
-    }
-    valueEl.textContent = text;
+    valueEl.dataset.placeholder = "true";
+    valueEl.textContent = "Select a purpose";
   };
-
-  const startPlaceholderCycle = () => {
-    if (!valueEl || valueEl.dataset.placeholder !== "true" || !purposeLabels.length) return;
-    stopPlaceholderCycle();
-    showPlaceholder(purposeLabels[0], false);
-    if (reduced || purposeLabels.length < 2) return;
-    cycleIndex = 0;
-    cycleTimer = setInterval(() => {
-      if (valueEl.dataset.placeholder !== "true") {
-        stopPlaceholderCycle();
-        return;
-      }
-      cycleIndex = (cycleIndex + 1) % purposeLabels.length;
-      showPlaceholder(purposeLabels[cycleIndex], true);
-    }, 2200);
+  const emailField = document.getElementById("contact-email");
+  const messageField = document.getElementById("contact-message");
+  const clearInvalid = (field) => {
+    field?.removeAttribute("aria-invalid");
+    field?.removeAttribute("aria-describedby");
   };
+  const markInvalid = (field, message) => {
+    setStatus(message, "error");
+    field?.setAttribute("aria-invalid", "true");
+    field?.setAttribute("aria-describedby", "contact-status");
+    field?.focus();
+  };
+  [emailField, messageField].forEach((field) => {
+    field?.addEventListener("input", () => clearInvalid(field));
+  });
 
   const closeMenu = () => {
     if (!select || !trigger || !menu) return;
@@ -181,12 +162,12 @@ if (pathEl) pathEl.textContent = location.pathname;
 
   const choose = (option) => {
     if (!option || !valueEl || !hidden) return;
-    stopPlaceholderCycle();
+    clearInvalid(trigger);
     options.forEach((o) => o.setAttribute("aria-selected", "false"));
     option.setAttribute("aria-selected", "true");
     valueEl.textContent = option.textContent.trim();
     valueEl.dataset.placeholder = "false";
-    valueEl.classList.remove("is-cycling");
+
     hidden.value = option.getAttribute("data-value") || option.dataset.value || "";
     closeMenu();
     trigger?.focus();
@@ -246,24 +227,45 @@ if (pathEl) pathEl.textContent = location.pathname;
     }
   });
 
-  startPlaceholderCycle();
+  if (!hidden?.value) resetPlaceholder();
 
   let submitting = false;
   const captcha = document.getElementById("contact-captcha");
   let captchaToken = "";
   let captchaId = null;
-  if (captcha && window.turnstile) {
-    captchaId = window.turnstile.render("#contact-captcha", {
-      sitekey: captcha.dataset.sitekey,
-      theme: "dark",
-      size: "compact",
-      callback: (token) => { captchaToken = token; },
-      "expired-callback": () => { captchaToken = ""; },
-      "error-callback": () => {
-        captchaToken = "";
-        setStatus("Verification could not load. Please reload the page or contact me through LinkedIn or X.", "error");
-      },
-    });
+  const captchaStatus = document.getElementById("captcha-status");
+  const setCaptchaStatus = (message) => {
+    if (!captchaStatus) return;
+    captchaStatus.textContent = message;
+    captchaStatus.classList.toggle("is-error", Boolean(message));
+  };
+  if (captcha) {
+    if (window.turnstile) {
+      try {
+        captchaId = window.turnstile.render("#contact-captcha", {
+          sitekey: captcha.dataset.sitekey,
+          theme: "dark",
+          size: "compact",
+          callback: (token) => { captchaToken = token; setCaptchaStatus(""); },
+          "expired-callback": () => {
+            captchaToken = "";
+            setCaptchaStatus("Verification expired. Please complete the anti-spam check again.");
+          },
+          "timeout-callback": () => {
+            captchaToken = "";
+            setCaptchaStatus("Verification timed out. Please try the anti-spam check again.");
+          },
+          "error-callback": () => {
+            captchaToken = "";
+            setCaptchaStatus("Verification could not load. Please reload the page or contact me through LinkedIn or X.");
+          },
+        });
+      } catch {
+        setCaptchaStatus("Verification could not start. Please reload the page or use the social links below.");
+      }
+    } else {
+      setCaptchaStatus("Verification could not load. Please reload the page or use the social links below.");
+    }
   }
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -275,22 +277,24 @@ if (pathEl) pathEl.textContent = location.pathname;
       : (valueEl?.textContent || "").trim();
     const message = (document.getElementById("contact-message")?.value || "").trim();
 
+    [emailField, trigger, messageField].forEach(clearInvalid);
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setStatus("Please enter a valid email.", "error");
+      markInvalid(emailField, "Please enter a valid email.");
       return;
     }
     if (!purpose) {
-      setStatus("Please select a purpose.", "error");
+      markInvalid(trigger, "Please select a purpose.");
       openMenu();
       return;
     }
     if (!message) {
-      setStatus("Please add a short description.", "error");
+      markInvalid(messageField, "Please add a short description.");
       return;
     }
 
     if (captcha && !captchaToken) {
-      setStatus("Please complete the anti-spam verification. If it does not appear, reload the page or use the social links below.", "error");
+      setStatus("", "");
+      setCaptchaStatus("Please complete the anti-spam verification. If it does not appear, reload the page or use the social links below.");
       return;
     }
     const payload = { email, purpose: purposeLabel || purpose, message };
@@ -324,7 +328,7 @@ if (pathEl) pathEl.textContent = location.pathname;
       if (hidden) hidden.value = "";
       options.forEach((option) => option.setAttribute("aria-selected", "false"));
       if (valueEl) valueEl.dataset.placeholder = "true";
-      startPlaceholderCycle();
+      resetPlaceholder();
       sendBtn?.classList.add("is-sent");
       setStatus("Thank you! Your message has been submitted successfully.", "ok");
     } catch {

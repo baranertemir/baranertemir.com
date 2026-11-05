@@ -5,11 +5,11 @@
     <div class="avatar-wrap flicker" data-hold-a="{{ .hold_a | default 4500 }}" data-hold-b="{{ .hold_b | default 1500 }}" data-delay="0">
       {{ $avatar := resources.Get .avatar1 }}
       {{ if $avatar }}
-      {{ $small := $avatar.Resize "168x webp q85" }}{{ $large := $avatar.Resize "336x webp q85" }}
-      <img src="{{ $small.RelPermalink }}" srcset="{{ $small.RelPermalink }} 168w, {{ $large.RelPermalink }} 336w" sizes="168px" alt="{{ $.Site.Title }}" class="avatar avatar-a" width="168" height="168" fetchpriority="high">
-      {{ else }}<img src="{{ .avatar1 | relURL }}" alt="{{ $.Site.Title }}" class="avatar avatar-a" width="168" height="168">{{ end }}
+      {{ $small := $avatar.Resize "250x webp q85" }}{{ $large := $avatar.Resize "500x webp q85" }}
+      <img src="{{ $small.RelPermalink }}" srcset="{{ $small.RelPermalink }} 250w, {{ $large.RelPermalink }} 500w" sizes="250px" alt="{{ $.Site.Title }}" class="avatar avatar-a" width="250" height="250" fetchpriority="high">
+      {{ else }}<img src="{{ .avatar1 | relURL }}" alt="{{ $.Site.Title }}" class="avatar avatar-a" width="250" height="250">{{ end }}
       {{ with .avatar2 }}
-      <img src="{{ . | relURL }}" alt="{{ $.Site.Params.name }}" class="avatar avatar-b" width="168" height="168">
+      <img src="{{ . | relURL }}" alt="{{ $.Site.Params.name }}" class="avatar avatar-b" width="250" height="250">
       {{ end }}
     </div>
     {{ end }}
@@ -208,7 +208,7 @@
             aria-controls="purpose-menu"
             aria-labelledby="purpose-label purpose-trigger"
           >
-            <span class="purpose-value" data-placeholder="true" id="purpose-placeholder"></span>
+            <span class="purpose-value" data-placeholder="true" id="purpose-placeholder">Select a purpose</span>
             {{ partial "octopus.html" (dict "class" "purpose-caret" "width" 14 "height" 14) }}
           </button>
           <ul class="purpose-menu" id="purpose-menu" role="listbox" aria-labelledby="purpose-label" hidden>
@@ -233,6 +233,7 @@
 
       {{ with .Site.Params.turnstile_site_key }}
       <div id="contact-captcha" data-sitekey="{{ . }}" aria-label="Anti-spam verification"></div>
+      <p id="captcha-status" class="contact-status" role="status" aria-live="polite"></p>
       {{ end }}
       <button type="submit" class="contact-send" id="contact-send">
         <span class="send-label">Send message</span>
