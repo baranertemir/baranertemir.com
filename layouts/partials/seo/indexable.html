@@ -1,0 +1,5 @@
+{{ $indexable := not (or .Site.Params.noindex .Params.noindex .Draft (eq .Kind "404")) }}
+{{ if and (in (slice "taxonomy" "term" "section") .Kind) (eq (len .RegularPagesRecursive) 0) }}
+  {{ $indexable = false }}
+{{ end }}
+{{ return $indexable }}

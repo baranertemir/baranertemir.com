@@ -1,0 +1,3 @@
+[submodule "themes/freaky"]
+	path = themes/freaky
+	url = https://github.com/freaktopus/hugo-theme-freaky

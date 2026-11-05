@@ -1,0 +1,59 @@
+baseURL = 'https://baranertemir.com/'
+locale = 'en-us'
+title = 'Aydın Baran Ertemir'
+theme = 'freaky'
+enableRobotsTXT = true
+buildDrafts = false
+buildFuture = false
+
+[params]
+seo_title = "Aydın Baran Ertemir | Security Research"
+description = "Security research and technical notes by Aydın Baran Ertemir on web application security, threat intelligence, reverse engineering and Linux."
+social_image = "images/social-card.png"
+social_image_alt = "Aydın Baran Ertemir — Security Research"
+identity_profiles = ["https://github.com/baranertemir", "https://www.linkedin.com/in/baranertemir/", "https://x.com/baranertemir1"]
+
+aka = "erto"
+bio = "Security Research · Web Application Security · Threat Intelligence · Reverse Engineering"
+location = "Ataturk University - Turkey"
+
+
+
+ current_roles = [
+    "Founder @ Threat House",
+    "Freelancer @ Cyber-Sec/Development",
+    "First year @ Computer Programming",
+    "Well-versed in current affairs, open to job offers",
+  ]
+
+[params.hero]
+  avatar1 = "images/avatar_1.png" 
+
+  
+[params.about]
+
+lead = "I am pursuing my passions; I never accepted that 'I couldn't do it.'"
+body = """
+To be honest, I’m a slave to my curiosity and ever-changing interests.I’ve never been able to define myself by saying, “This is who I am,” and I don’t think I ever will. I’m simply someone who follows their passions and explores whatever catches their interest.
+
+As a result, I’ve worked on many different things and explored a wide range of industries over the years. Here, I’ll be sharing my research, thoughts, knowledge, and articles that I believe are worth sharing about the field of IT, a world I’ve been immersed in for years.
+
+"""
+
+
+[params.social]
+  github = "https://github.com/baranertemir"
+  linkedin = "https://www.linkedin.com/in/baranertemir/"
+  twitter = "https://x.com/baranertemir1"
+
+[[params.contact_purposes]]
+value = "research"
+label = "Security research"
+
+[[params.contact_purposes]]
+value = "work"
+label = "Work opportunity"
+
+[[params.contact_purposes]]
+value = "other"
+label = "Other"

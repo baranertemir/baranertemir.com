@@ -1,0 +1,21 @@
+{{ define "main" }}
+<article class="post reveal in">
+  <header class="post-header">
+    <p class="post-meta"><span class="accent">~$</span> cat {{ .File.BaseFileName }}.md</p>
+    <h1>{{ .Title }}</h1>
+    <p>By <a href="{{ .Site.Home.RelPermalink }}#about">{{ .Site.Title }}</a></p>
+    <time datetime="{{ .Date.Format `2006-01-02` }}">{{ .Date.Format "Jan 2, 2006" }}</time>
+    {{ if gt .Lastmod .Date }}<p>Updated <time datetime="{{ .Lastmod.Format `2006-01-02` }}">{{ .Lastmod.Format "Jan 2, 2006" }}</time></p>{{ end }}
+  </header>
+  {{ if and .Params.toc (gt (len .Fragments.Headings) 0) }}
+  <nav class="post-toc" aria-label="Table of contents"><h2>On this page</h2>{{ .TableOfContents }}</nav>
+  {{ end }}
+  <div class="prose">
+    {{ .Content }}
+  </div>
+  {{ with .GetTerms "tags" }}<nav class="post-tags" aria-label="Tags">{{ range . }}<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a> {{ end }}</nav>{{ end }}
+  {{ $related := .Site.RegularPages.Related . | first 3 }}
+  {{ with $related }}<aside class="related-posts"><h2>Related reading</h2><ul>{{ range . }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>{{ end }}</ul></aside>{{ end }}
+  <p class="back"><a href="{{ `/` | relURL }}#{{ if eq .Section `projects` }}projects{{ else if eq .Section `publications` }}publications{{ else if eq .Section `blogs` }}blogs{{ else if eq .Section `articles` }}articles{{ else }}home{{ end }}">← back</a></p>
+</article>
+{{ end }}
